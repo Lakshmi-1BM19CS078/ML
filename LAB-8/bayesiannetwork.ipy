@@ -1,0 +1,107 @@
+import numpy as np
+import pandas as pd
+import csv 
+from pgmpy.estimators import MaximumLikelihoodEstimator
+from pgmpy.models import BayesianModel
+from pgmpy.inference import VariableElimination
+In [2]:
+#read Cleveland Heart Disease data
+heartDisease = pd.read_csv('heart.csv')
+heartDisease = heartDisease.replace('?',np.nan)
+In [3]:
+#display the data
+print('Sample instances from the dataset are given below')
+print(heartDisease.head())
+Sample instances from the dataset are given below
+   age  sex  cp  trestbps  chol  fbs  restecg  thalach  exang  oldpeak  slope  \
+0   63    1   1       145   233    1        2      150      0      2.3      3   
+1   67    1   4       160   286    0        2      108      1      1.5      2   
+2   67    1   4       120   229    0        2      129      1      2.6      2   
+3   37    1   3       130   250    0        0      187      0      3.5      3   
+4   41    0   2       130   204    0        2      172      0      1.4      1   
+
+  ca thal  heartdisease  
+0  0    6             0  
+1  3    3             2  
+2  2    7             1  
+3  0    3             0  
+4  0    3             0  
+In [4]:
+#display the Attributes names and datatyes
+print('\n Attributes and datatypes')
+print(heartDisease.dtypes)
+ Attributes and datatypes
+age               int64
+sex               int64
+cp                int64
+trestbps          int64
+chol              int64
+fbs               int64
+restecg           int64
+thalach           int64
+exang             int64
+oldpeak         float64
+slope             int64
+ca               object
+thal             object
+heartdisease      int64
+dtype: object
+In [5]:
+#Creat Model-Bayesian Network 
+model =  BayesianModel([('age','heartdisease'),('sex','heartdisease'),('exang','heartdisease'),('cp','heartdisease'),('heartdisease','restecg'),('heartdisease','chol')])
+C:\ProgramData\Anaconda3\lib\site-packages\pgmpy\models\BayesianModel.py:8: FutureWarning: BayesianModel has been renamed to BayesianNetwork. Please use BayesianNetwork class, BayesianModel will be removed in future.
+  warnings.warn(
+In [6]:
+#Learning CPDs using Maximum Likelihood Estimators
+print('\n Learning CPD using Maximum likelihood estimators')
+model.fit(heartDisease,estimator=MaximumLikelihoodEstimator)
+ Learning CPD using Maximum likelihood estimators
+In [7]:
+#Inferencing with Bayesian Network
+print('\n Inferencing with Bayesian Network:')
+HeartDiseasetest_infer = VariableElimination(model)
+ Inferencing with Bayesian Network:
+In [8]:
+#computing the Probability of HeartDisease given restecg
+print('\n 1.Probability of HeartDisease given evidence= restecg :1')
+q1=HeartDiseasetest_infer.query(variables=['heartdisease'],evidence={'restecg':1})
+print(q1)
+ 1.Probability of HeartDisease given evidence= restecg :1
+  0%|          | 0/4 [00:00<?, ?it/s]
+  0%|          | 0/4 [00:00<?, ?it/s]
++-----------------+---------------------+
+| heartdisease    |   phi(heartdisease) |
++=================+=====================+
+| heartdisease(0) |              0.1012 |
++-----------------+---------------------+
+| heartdisease(1) |              0.0000 |
++-----------------+---------------------+
+| heartdisease(2) |              0.2392 |
++-----------------+---------------------+
+| heartdisease(3) |              0.2015 |
++-----------------+---------------------+
+| heartdisease(4) |              0.4581 |
++-----------------+---------------------+
+In [9]:
+#computing the Probability of HeartDisease given cp
+print('\n 2.Probability of HeartDisease given evidence= cp:2 ')
+q2=HeartDiseasetest_infer.query(variables=['heartdisease'],evidence={'cp':2})
+print(q2)
+ 2.Probability of HeartDisease given evidence= cp:2 
+  0%|          | 0/3 [00:00<?, ?it/s]
+  0%|          | 0/3 [00:00<?, ?it/s]
++-----------------+---------------------+
+| heartdisease    |   phi(heartdisease) |
++=================+=====================+
+| heartdisease(0) |              0.3610 |
++-----------------+---------------------+
+| heartdisease(1) |              0.2159 |
++-----------------+---------------------+
+| heartdisease(2) |              0.1373 |
++-----------------+---------------------+
+| heartdisease(3) |              0.1537 |
++-----------------+---------------------+
+| heartdisease(4) |              0.1321 |
++-----------------+---------------------+
+In [ ]:
+ 
